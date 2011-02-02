@@ -13,7 +13,9 @@ LOCAL_SRC_FILES += $(MY_FILES)
 #LOCAL_SRC_FILES += $(wildcard *.c)
 #LOCAL_SRC_FILES += $(foreach F, $(APP_SUBDIRS), $(addprefix $(F)/,$(notdir $(wildcard $(LOCAL_PATH)/$(F)/*.c))))
 
-LOCAL_MODULE:= screen
+LOCAL_MODULE := screen
+LOCAL_MODULE_CLASS := EXECUTABLES
+LOCAL_MODULE_TAGS := eng
 
 LOCAL_SHARED_LIBRARIES := libncurses
 
@@ -24,5 +26,30 @@ LOCAL_CFLAGS := -g -O2 -Dandroid \
 -DSCREENENCODINGS=\"/data/screen/utf8encodings\" \
 -DGIT_REV=\"`git describe --always 2>/dev/null`\" \
 -DSCREEN=\"screen-$(VERSION)\"
+
+LOCAL_SHARED_LIBRARIES := libncurses
+
+intermediates:= $(local-intermediates-dir)
+GEN := $(addprefix $(intermediates)/src/, \
+	osdef.h \
+	comm.h \
+	term.h \
+	)
+$(GEN): PRIVATE_INPUT_FILE = $<
+$(GEN): PRIVATE_CUSTOM_TOOL = $(shell cd $(LOCAL_PATH)/src && \
+                                      sh $(patsubst $(LOCAL_PATH)/src/%,%,$(PRIVATE_INPUT_FILE)) \
+                               )
+$(GEN): $(intermediates)/src/%.h : $(LOCAL_PATH)/src/%.sh
+	$(transform-generated-source)
+LOCAL_GENERATED_SOURCES += $(GEN)
+
+GEN := $(intermediates)/src/tty.c
+$(GEN): PRIVATE_INPUT_FILE = $<
+$(GEN): PRIVATE_CUSTOM_TOOL = $(shell cd $(LOCAL_PATH)/src && \
+                                      sh $(patsubst $(LOCAL_PATH)/src/%,%,$(PRIVATE_INPUT_FILE)) \
+                               )
+$(GEN): $(intermediates)/src/%.c : $(LOCAL_PATH)/src/%.sh
+	$(transform-generated-source)
+LOCAL_GENERATED_SOURCES += $(GEN)
 
 include $(BUILD_EXECUTABLE)

@@ -2,12 +2,13 @@
 # sh tty.sh tty.c
 # This inserts all the needed #ifdefs for IF{} statements
 # and generates tty.c
+TARGET=tty.c
 
 #
 # Stupid cpp on A/UX barfs on ``#if defined(FOO) && FOO < 17'' when 
 # FOO is undefined. Reported by Robert C. Tindall (rtindall@uidaho.edu)
 #
-rm -f $1
+rm -f $TARGET
 sed -e '1,26d' \
 -e 's%^IF{\([^}]*\)}\(.*\)%#if defined(\1)\
 \2\
@@ -20,8 +21,8 @@ sed -e '1,26d' \
 \2\
 #endif \
 #endif /* \1 */%' \
- < $0 > $1
-chmod -w $1
+ < $0 > $TARGET
+chmod -w $TARGET
 exit 0
 
 /* Copyright (c) 2008, 2009
